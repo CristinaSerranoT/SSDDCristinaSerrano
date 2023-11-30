@@ -3,27 +3,48 @@
 import Ice
 
 import IceDrive
+import json
+import hashlib
 
+class DataTransfer(IceDrive.DataTransfer):
+    """Implementation of an IceDrive.DataTransfer interface."""
 
-class User(IceDrive.User):
-    """Implementation of an IceDrive.User interface."""
+    def read(self, size: int, current: Ice.Current = None) -> bytes:
+        """Returns a list of bytes from the opened file."""
 
-    def getUsername(self, current: Ice.Current = None) -> str:
-        """Return the username for the User object."""
-
-    def isAlive(self, current: Ice.Current = None) -> bool:
-        """Check if the authentication is still valid or not."""
-
-    def refresh(self, current: Ice.Current = None) -> None:
-        """Renew the authentication for 1 more period of time."""
-
+    def close(self, current: Ice.Current = None) -> None:
+        """Close the currently opened file."""
 
 class BlobService(IceDrive.BlobService):
     """Implementation of an IceDrive.BlobService interface."""
 
+    def __init__(self, storage_file="blob_storage.json"):
+        self.storage_file = storage_file
+        self.load_storage()
+    
+    # Este método devuelve el número de enlaces para el blob_id proporcionado.
+    def load_storage(self):
+        try:  
+            with open(self.storage_file, "r") as file: 
+                self.blobs = json.load(file) 
+        except (FileNotFoundError, json.JSONDecodeError):   
+            self.blobs = {} 
+    
+    # Este método guarda el diccionario de blobs en el archivo de almacenamiento.
+    def save_storage(self):
+        with open(self.storage_file, "w") as file: # Guarda el contenido del diccionario en el archivo
+            json.dump(self.blobs, file) 
+    
+    # Este método devuelve el número de enlaces para el blob_id proporcionado.
     def link(self, blob_id: str, current: Ice.Current = None) -> None:
         """Mark a blob_id file as linked in some directory."""
         print("link", blob_id)
+        # Incrementa el conteo de enlaces para el blob
+        if blob_id in self.blobs:
+            self.blobs[blob_id] += 1
+        else:
+            self.blobs[blob_id] = 1
+        self.save_storage()
 
     def unlink(self, blob_id: str, current: Ice.Current = None) -> None:
         """Mark a blob_id as unlinked (removed) from some directory."""

@@ -31,8 +31,8 @@ class Client(Ice.Application):
         
         #Aqui se pueden probar los metodos del proxy de BlobService que se han implementado en el servidor
     
-        servicioBlob.link("link")
-        servicioBlob.unlink("unlink")
+        servicioBlob.link("/escritorio/hola.txt")
+        
         #servicioBlob.upload(servicioBlob.blob_id)
         #servicioBlob.download(servicioBlob.blob_id)  
         
