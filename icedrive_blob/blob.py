@@ -4,7 +4,7 @@ import Ice
 
 import IceDrive
 import json
-import hashlib
+
 
 class DataTransfer(IceDrive.DataTransfer):
     """Implementation of an IceDrive.DataTransfer interface."""
