@@ -32,8 +32,8 @@ class BlobService(IceDrive.BlobService):
     
     # Este método guarda el diccionario de blobs en el archivo de almacenamiento.
     def save_storage(self):
-        with open(self.storage_file, "w") as file: # Guarda el contenido del diccionario en el archivo
-            json.dump(self.blobs, file) 
+        with open(self.storage_file, "w") as file: 
+            json.dump(self.blobs, file)
     
     # Este método devuelve el número de enlaces para el blob_id proporcionado.
     def link(self, blob_id: str, current: Ice.Current = None) -> None:
