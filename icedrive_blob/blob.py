@@ -32,7 +32,7 @@ class BlobService(IceDrive.BlobService):
     
     # Este método guarda el diccionario de blobs en el archivo de almacenamiento.
     def save_storage(self):
-        with open(self.storage_file, "w") as file: 
+        with open(self.storage_file, "w") as file: # Guarda el contenido del diccionario en el archivo
             json.dump(self.blobs, file)
     
     # Este método devuelve el número de enlaces para el blob_id proporcionado.
@@ -46,9 +46,16 @@ class BlobService(IceDrive.BlobService):
             self.blobs[blob_id] = 1
         self.save_storage()
 
+    # Este método decrementa el número de enlaces para el blob_id proporcionado y elimina el blob si ya no está enlazado.
     def unlink(self, blob_id: str, current: Ice.Current = None) -> None:
         """Mark a blob_id as unlinked (removed) from some directory."""
         print("unlink", blob_id)
+        # Decrementa el conteo de enlaces y elimina el blob si ya no está enlazado
+        if blob_id in self.blobs:
+            self.blobs[blob_id] -= 1
+            if self.blobs[blob_id] == 0:
+                del self.blobs[blob_id]
+        self.save_storage()
 
     def upload(
         self, blob: IceDrive.DataTransferPrx, current: Ice.Current = None
