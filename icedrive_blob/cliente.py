@@ -9,19 +9,6 @@ import Ice
 import IceDrive
 
 
-def solicitar_operando(opName: str='') -> float:
-    '''Solicitad un valor por stdin y lo convierte a flotante'''
-    try: 
-        return float(input(f'Operando {opName}: '))
-    except ValueError as error:
-        print(f'Not valid number: {error}')
-        sys.exit()
-    except KeyboardInterrupt:
-        print('\nCancelado por el usuario')
-        sys.exit()
-
-
-
 class Client(Ice.Application):
     def run(self, args):
 
@@ -50,5 +37,5 @@ class Client(Ice.Application):
 
 def main():
     app = Client()
-    app.main(sys.argv)
+    app.main(sys.argv) 
     print("Bienvenido al cliente")
