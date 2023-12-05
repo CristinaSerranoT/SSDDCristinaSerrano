@@ -18,8 +18,8 @@ class Client(Ice.Application):
         
         #Aqui se pueden probar los metodos del proxy de BlobService que se han implementado en el servidor
     
-        servicioBlob.link("link")
-        servicioBlob.unlink("cris")
+        #servicioBlob.link("blob_id")
+        servicioBlob.unlink("blob_id")
         
         #servicioBlob.upload(servicioBlob.blob_id)
         #servicioBlob.download(servicioBlob.blob_id)  
@@ -29,10 +29,29 @@ class Client(Ice.Application):
         if not servicioBlob:
             print("El proxy es incorrecto")
             sys.exit(1)
-        
-        #num1 = solicitar_operando('1')
-        #num2 = solicitar_operando('2')
-        #print(f'La suma de ambos es: {cliente.div(num1, num2)}')
+            
+        while True:
+            print("\nMenú:")
+            print("1. Link Blob")
+            print("2. Unlink Blob")
+            print("3. Upload Blob")
+            print("4. Download Blob")
+            print("5. Salir")
+
+            opcion = input("Seleccione una opción (1-5): ")
+
+            if opcion == "1":
+                blob_id = input("Ingrese el Blob ID para enlazar: ")
+                servicioBlob.link(blob_id)
+            elif opcion == "2":
+                blob_id = input("Ingrese el Blob ID para desenlazar: ")
+                servicioBlob.unlink(blob_id)
+            elif opcion == "5":
+                print("Saliendo del programa.")
+                break
+            else:
+                print("Opción no válida. Intente de nuevo.")
+
 
 
 def main():
