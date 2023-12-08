@@ -4,7 +4,13 @@ import Ice
 
 import IceDrive
 import json
+import hashlib
 
+import tempfile
+import shutil
+import os
+
+ARCHIVOS = "archivosCopiados"
 
 class DataTransfer(IceDrive.DataTransfer):
     """Implementation of an IceDrive.DataTransfer interface."""
@@ -15,16 +21,14 @@ class DataTransfer(IceDrive.DataTransfer):
 
     # Este método lee un bloque de datos del archivo abierto y lo devuelve como una lista de bytes.
     def read(self, size: int, current: Ice.Current = None) -> bytes:
-        """Returns a list of bytes from the opened file."""
-        data = self.file.read(size)
-        if not data:
-            raise IceDrive.FailedToReadData()
-        return data
+            """Returns a list of bytes from the opened file."""
+            data = self.file.read(size)
+            return data if data else b''  # Devuelve b'' cuando no hay más datos
     # Este método cierra el archivo abierto.
     def close(self, current: Ice.Current = None) -> None:
         """Close the currently opened file."""
         self.file.close()
-        
+
         
 class BlobService(IceDrive.BlobService):
     """Implementation of an IceDrive.BlobService interface."""
@@ -68,12 +72,42 @@ class BlobService(IceDrive.BlobService):
                 del self.blobs[blob_id]
         self.save_storage()
 
-    def upload(
-        self, blob: IceDrive.DataTransferPrx, current: Ice.Current = None
-    ) -> str:
+    def upload(self, blob: IceDrive.DataTransferPrx, current: Ice.Current = None) -> str:
         """Register a DataTransfer object to upload a file to the service."""
         print("upload")
+        try:
+            if blob:
+                # Calcula el hash del blob usando SHA256 como identificador
+                blob_data = bytearray()
+                size = 1024  # Tamaño del bloque para leer
+                while True:
+                    data = blob.read(size)
+                    if not data:
+                        break
+                    blob_data.extend(data)
+                
+                # Crea la carpeta de guardado si no existe
+                os.makedirs(ARCHIVOS, exist_ok=True)
+                
+                # Calcula el hash del blob usando SHA256 como identificador
+                blob_id = hashlib.sha256(blob_data).hexdigest()
+                
+                # Guarda el contenido del blob en un archivo en la carpeta de guardado
+                file_path = os.path.join(ARCHIVOS, f"{blob_id}.txt")
+                
+                with open(file_path, "wb") as file:
+                    file.write(blob_data)
+            else:
+                raise IceDrive.FailedToReadData(blob_id)
+        except IceDrive.FailedToReadData as exception:
+            print(f"Error al subir el blob: {exception}")
+        else:
+            print("Blob subido con éxito. Blob ID:", blob_id)
+            self.blobs[blob_id] = 1
+            self.save_storage()
+            return blob_id
 
+            
     def download(
         self, blob_id: str, current: Ice.Current = None
     ) -> IceDrive.DataTransferPrx:
