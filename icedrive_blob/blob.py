@@ -44,12 +44,8 @@ class BlobService(IceDrive.BlobService):
                 self.blobs = json.load(file) 
         except (FileNotFoundError, json.JSONDecodeError):   
             self.blobs = {} 
-    '''
-    # Este método guarda el diccionario de blobs en el archivo de almacenamiento.
-    def save_storage(self):
-        with open(self.storage_file, "w") as file: # Guarda el contenido del diccionario en el archivo
-            json.dump(self.blobs, file)'''
 
+    # Este método guarda el diccionario de blobs en el archivo de almacenamiento.
     def save_storage(self):
         with open(self.storage_file, "w") as file:
             file.write("{\n")
@@ -59,8 +55,6 @@ class BlobService(IceDrive.BlobService):
                     file.write(",")
                 file.write("\n")
             file.write("}\n")
-
-
     
     # Este método devuelve el número de enlaces para el blob_id proporcionado.
     def link(self, blob_id: str, current: Ice.Current = None) -> None:
@@ -123,5 +117,13 @@ class BlobService(IceDrive.BlobService):
     def download(
         self, blob_id: str, current: Ice.Current = None
     ) -> IceDrive.DataTransferPrx:
-        """Return a DataTransfer objet to enable the client to download the given blob_id."""
+        """Return a DataTransfer object to enable the client to download the given blob_id."""
         print("download", blob_id)
+        if blob_id in self.blobs:
+            file_path = os.path.join(ARCHIVOS, f"{blob_id}.txt")
+            servant = DataTransfer(file_path)
+            proxy = current.adapter.addWithUUID(servant)
+            data_transfer_proxy = IceDrive.DataTransferPrx.checkedCast(proxy)
+            return data_transfer_proxy
+        else:
+            raise IceDrive.BlobNotFound(blob_id)

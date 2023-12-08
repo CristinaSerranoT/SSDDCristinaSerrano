@@ -20,14 +20,6 @@ class Client(Ice.Application):
         proxy = self.communicator().stringToProxy(args[1])
         servicioBlob = IceDrive.BlobServicePrx.checkedCast(proxy)
         
-        #Aqui se pueden probar los metodos del proxy de BlobService que se han implementado en el servidor
-    
-        #servicioBlob.link("blob_id")
-        #servicioBlob.unlink("blob_id")
-        
-        #servicioBlob.upload(servicioBlob.blob_id)
-        #servicioBlob.download(servicioBlob.blob_id)  
-        
         #Comprobamos que el proxy es correcto
         
         if not servicioBlob:
@@ -72,11 +64,28 @@ class Client(Ice.Application):
                         with open(file_path, "rb") as file:
                             blob_id = servicioBlob.upload(data_transfer_proxy)
                             print(f"Blob subido con éxito. ID: {blob_id}")
-                            adapter.destroy()
+                            #Todo objeto DataTransfer() debe ser destruido después de que se haya completado la transferencia de datos.
+                            adapter.destroy() 
                     else:
                         raise FileNotFoundError(file_path)
                 except Exception as e:
                     print(f"Error al subir el archivo: {e}")
+            elif opcion == "4":
+                try:
+                    blob_id = input("Ingrese el Blob ID para descargar: ")
+                    # Descargar el blob utilizando el servicioBlob
+                    data_transfer_proxy = servicioBlob.download(blob_id)
+
+                    # Utilizar el proxy para recibir los datos del servicio y guardarlos en un archivo local
+                    with open(f"download_{blob_id}.txt", "wb") as file:
+                        while True:
+                            data = data_transfer_proxy.read(1024)
+                            if not data:
+                                break
+                            file.write(data)
+                    print(f"Blob descargado con éxito. Se ha guardado como download_{blob_id}.txt")
+                except Exception as e:
+                    print(f"Error al descargar el archivo: {e}")
 
             elif opcion == "5":
                 print("Saliendo del programa.")
