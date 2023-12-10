@@ -54,10 +54,11 @@ class Client(Ice.Application):
                 except Exception as e:
                     print(f"Otro error al enlazar el blob: {e}")
 
-                
             elif opcion == "3":
                 try:
+                    print("El formato de la ruta del archivo debe ser: /home/usuario/carpeta/archivo.txt")
                     file_path = input("Ingrese la ruta del archivo para subir como Blob: ")
+                    
                     # Verificar si el archivo existe
                     if os.path.exists(file_path):
                         # Crear un proxy para el objeto DataTransfer y registrarlo con el adaptador
@@ -77,13 +78,16 @@ class Client(Ice.Application):
                         with open(file_path, "rb") as file:
                             blob_id = servicioBlob.upload(data_transfer_proxy)
                             print(f"Blob subido con éxito. ID: {blob_id}")
-                            #Todo objeto DataTransfer() debe ser destruido después de que se haya completado la transferencia de datos.
+                            
+                            # Todo objeto DataTransfer() debe ser destruido después de que se haya completado la transferencia de datos.
                             adapter.destroy() 
                     else:
                         raise FileNotFoundError(file_path)
+                except IceDrive.InvalidBlobId as e:
+                    print(f"Error al subir el archivo: {e}")
                 except Exception as e:
                     print(f"Error al subir el archivo: {e}")
-                    
+      
             elif opcion == "4":
                 try:
                     blob_id = input("Ingrese el Blob ID para descargar: ")

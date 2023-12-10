@@ -5,9 +5,6 @@ import Ice
 import IceDrive
 import json
 import hashlib
-
-import tempfile
-import shutil
 import os
 
 ARCHIVOS = "archivosCopiados"
@@ -84,46 +81,49 @@ class BlobService(IceDrive.BlobService):
 
 
     def upload(self, blob: IceDrive.DataTransferPrx, current: Ice.Current = None) -> str:
-        """Register a DataTransfer object to upload a file to the service."""
-        print("upload")
-        try:
-            if blob:
-                # Calcula el hash del blob usando SHA256 como identificador
-                blob_data = bytearray()
-                size = 1024  # Tamaño del bloque para leer
-                while True:
-                    data = blob.read(size)
-                    if not data:
-                        break
-                    blob_data.extend(data)
-                
-                # Crea la carpeta de guardado si no existe
-                os.makedirs(ARCHIVOS, exist_ok=True)
-                
-                # Calcula el hash del blob usando SHA256 como identificador
-                blob_id = hashlib.sha256(blob_data).hexdigest()
-                
-                # Guarda el contenido del blob en un archivo en la carpeta de guardado
-                file_path = os.path.join(ARCHIVOS, f"{blob_id}.txt")
-                
-                with open(file_path, "wb") as file:
-                    file.write(blob_data)
-            else:
-                raise IceDrive.FailedToReadData(blob_id)
-        except IceDrive.FailedToReadData as exception:
-            print(f"Error al subir el blob: {exception}")
-        else:
-            print("Blob subido con éxito. Blob ID:", blob_id)
-            self.blobs[blob_id] = 1
-            self.save_storage()
-            return blob_id
+            """Register a DataTransfer object to upload a file to the service."""
+            try:
+                if blob:
+                    # Calcula el hash del blob usando SHA256 como identificador
+                    blob_data = bytearray()
+                    size = 1024  # Tamaño del bloque para leer
+                    while True:
+                        data = blob.read(size)
+                        if not data:
+                            break
+                        blob_data.extend(data)
+                    
+                    # Calcula el hash del blob usando SHA256 como identificador
+                    blob_id = hashlib.sha256(blob_data).hexdigest()
 
+                    # Verifica que el blob_id coincida con el hash SHA256 del contenido del blob
+                    if blob_id != hashlib.sha256(blob_data).hexdigest():
+                        raise IceDrive.InvalidBlobId("El blob_id no coincide con el hash SHA256 del contenido del blob.")
+
+                    # Crea la carpeta de guardado si no existe
+                    os.makedirs(ARCHIVOS, exist_ok=True)
+                    
+                    # Guarda el contenido del blob en un archivo en la carpeta de guardado
+                    file_path = os.path.join(ARCHIVOS, f"{blob_id}.txt")
+                    
+                    with open(file_path, "wb") as file:
+                        file.write(blob_data)
+                else:
+                    raise IceDrive.FailedToReadData(blob_id)
+            except IceDrive.FailedToReadData as exception:
+                print(f"Error al subir el blob: {exception}")
+            except IceDrive.InvalidBlobId as exception:
+                print(f"Error al subir el blob: {exception}")
+            else:
+                print("Blob subido con éxito. Blob ID:", blob_id)
+                self.blobs[blob_id] = 1
+                self.save_storage()
+                return blob_id
             
     def download(
         self, blob_id: str, current: Ice.Current = None
     ) -> IceDrive.DataTransferPrx:
         """Return a DataTransfer object to enable the client to download the given blob_id."""
-        #print("download", blob_id)
         if blob_id in self.blobs:
             file_path = os.path.join(ARCHIVOS, f"{blob_id}.txt")
             servant = DataTransfer(file_path)
