@@ -84,8 +84,10 @@ class Client(Ice.Application):
                                 break
                             file.write(data)
                     print(f"Blob descargado con éxito. Se ha guardado como download_{blob_id}.txt")
+                except IceDrive.UnknownBlob as e:
+                    print(f"Error al descargar el archivo: Blob desconocido - {blob_id}")
                 except Exception as e:
-                    print(f"Error al descargar el archivo: {e}")
+                    print(f"Otro error al descargar el archivo: {blob_id}")
 
             elif opcion == "5":
                 print("Saliendo del programa.")

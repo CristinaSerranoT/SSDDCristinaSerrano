@@ -118,7 +118,7 @@ class BlobService(IceDrive.BlobService):
         self, blob_id: str, current: Ice.Current = None
     ) -> IceDrive.DataTransferPrx:
         """Return a DataTransfer object to enable the client to download the given blob_id."""
-        print("download", blob_id)
+        #print("download", blob_id)
         if blob_id in self.blobs:
             file_path = os.path.join(ARCHIVOS, f"{blob_id}.txt")
             servant = DataTransfer(file_path)
@@ -126,4 +126,4 @@ class BlobService(IceDrive.BlobService):
             data_transfer_proxy = IceDrive.DataTransferPrx.checkedCast(proxy)
             return data_transfer_proxy
         else:
-            raise IceDrive.BlobNotFound(blob_id)
+            raise IceDrive.UnknownBlob(blob_id)
