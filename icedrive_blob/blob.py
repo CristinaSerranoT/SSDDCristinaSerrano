@@ -59,13 +59,15 @@ class BlobService(IceDrive.BlobService):
     # Este método devuelve el número de enlaces para el blob_id proporcionado.
     def link(self, blob_id: str, current: Ice.Current = None) -> None:
         """Mark a blob_id file as linked in some directory."""
-        print("link", blob_id)
+            # Verifica si el blob_id es válido antes de incrementar los enlaces
+        if blob_id not in self.blobs:
+            raise IceDrive.UnknownBlob(blob_id)
+
         # Incrementa el conteo de enlaces para el blob
-        if blob_id in self.blobs:
-            self.blobs[blob_id] += 1
-        else:
-            self.blobs[blob_id] = 1
+        self.blobs[blob_id] += 1
         self.save_storage()
+        print(f"Enlace exitoso para el blob con ID: {blob_id}. Total de enlaces: {self.blobs[blob_id]}")
+
 
     # Este método decrementa el número de enlaces para el blob_id proporcionado y elimina el blob si ya no está enlazado.
     def unlink(self, blob_id: str, current: Ice.Current = None) -> None:

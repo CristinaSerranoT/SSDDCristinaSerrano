@@ -37,11 +37,18 @@ class Client(Ice.Application):
             opcion = input("Seleccione una opción (1-5): ")
 
             if opcion == "1":
-                blob_id = input("Ingrese el Blob ID para enlazar: ")
-                servicioBlob.link(blob_id)
+                try:
+                    blob_id = input("Ingrese el Blob ID para enlazar: ")
+                    servicioBlob.link(blob_id)
+                except IceDrive.UnknownBlob as e:
+                    print(f"Error al enlazar el blob: Blob desconocido - {e}")
+                except Exception as e:
+                    print(f"Otro error al enlazar el blob: {e}")
+
             elif opcion == "2":
                 blob_id = input("Ingrese el Blob ID para desenlazar: ")
                 servicioBlob.unlink(blob_id)
+                
             elif opcion == "3":
                 try:
                     file_path = input("Ingrese la ruta del archivo para subir como Blob: ")
@@ -70,6 +77,7 @@ class Client(Ice.Application):
                         raise FileNotFoundError(file_path)
                 except Exception as e:
                     print(f"Error al subir el archivo: {e}")
+                    
             elif opcion == "4":
                 try:
                     blob_id = input("Ingrese el Blob ID para descargar: ")
@@ -85,9 +93,9 @@ class Client(Ice.Application):
                             file.write(data)
                     print(f"Blob descargado con éxito. Se ha guardado como download_{blob_id}.txt")
                 except IceDrive.UnknownBlob as e:
-                    print(f"Error al descargar el archivo: Blob desconocido - {blob_id}")
+                    print(f"Error al descargar el archivo: Blob desconocido - {e}")
                 except Exception as e:
-                    print(f"Otro error al descargar el archivo: {blob_id}")
+                    print(f"Otro error al descargar el archivo: {e}")
 
             elif opcion == "5":
                 print("Saliendo del programa.")
