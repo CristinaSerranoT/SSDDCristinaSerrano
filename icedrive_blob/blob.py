@@ -10,7 +10,6 @@ import os
 ARCHIVOS = "archivosCopiados"
 
 class DataTransfer(IceDrive.DataTransfer):
-    """Implementation of an IceDrive.DataTransfer interface."""
     
     def __init__(self, file_path):
         self.file_path = file_path
@@ -18,17 +17,14 @@ class DataTransfer(IceDrive.DataTransfer):
 
     # Este método lee un bloque de datos del archivo abierto y lo devuelve como una lista de bytes.
     def read(self, size: int, current: Ice.Current = None) -> bytes:
-            """Returns a list of bytes from the opened file."""
             data = self.file.read(size)
             return data if data else b''  # Devuelve b'' cuando no hay más datos
     # Este método cierra el archivo abierto.
     def close(self, current: Ice.Current = None) -> None:
-        """Close the currently opened file."""
         self.file.close()
 
         
 class BlobService(IceDrive.BlobService):
-    """Implementation of an IceDrive.BlobService interface."""
 
     def __init__(self, storage_file="blob_storage.json"):
         self.storage_file = storage_file

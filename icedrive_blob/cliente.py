@@ -114,7 +114,6 @@ class Client(Ice.Application):
                 print("Opción no válida. Intente de nuevo.")
 
 
-
 def main():
     app = Client()
     app.main(sys.argv) 
