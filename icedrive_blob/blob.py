@@ -72,13 +72,16 @@ class BlobService(IceDrive.BlobService):
     # Este método decrementa el número de enlaces para el blob_id proporcionado y elimina el blob si ya no está enlazado.
     def unlink(self, blob_id: str, current: Ice.Current = None) -> None:
         """Mark a blob_id as unlinked (removed) from some directory."""
-        print("unlink", blob_id)
         # Decrementa el conteo de enlaces y elimina el blob si ya no está enlazado
         if blob_id in self.blobs:
             self.blobs[blob_id] -= 1
             if self.blobs[blob_id] == 0:
                 del self.blobs[blob_id]
-        self.save_storage()
+            self.save_storage()
+            print(f"Desenlace exitoso para el blob con ID: {blob_id}. Total de enlaces: {self.blobs[blob_id]}")
+        else:
+            raise IceDrive.UnknownBlob(blob_id)
+
 
     def upload(self, blob: IceDrive.DataTransferPrx, current: Ice.Current = None) -> str:
         """Register a DataTransfer object to upload a file to the service."""

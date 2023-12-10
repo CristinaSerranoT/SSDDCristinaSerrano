@@ -46,8 +46,14 @@ class Client(Ice.Application):
                     print(f"Otro error al enlazar el blob: {e}")
 
             elif opcion == "2":
-                blob_id = input("Ingrese el Blob ID para desenlazar: ")
-                servicioBlob.unlink(blob_id)
+                try:
+                    blob_id = input("Ingrese el Blob ID para desenlazar: ")
+                    servicioBlob.unlink(blob_id)
+                except IceDrive.UnknownBlob as e:
+                    print(f"Error al desenlazar el blob: Blob desconocido - {e}")
+                except Exception as e:
+                    print(f"Otro error al enlazar el blob: {e}")
+
                 
             elif opcion == "3":
                 try:
