@@ -76,7 +76,7 @@ class Client(Ice.Application):
 
                         # Utilizar el proxy para enviar los datos al servicio
                         with open(file_path, "rb") as file:
-                            blob_id = servicioBlob.upload(data_transfer_proxy)
+                            blob_id = servicioBlob.upload(None, data_transfer_proxy)
                             print(f"Blob subido con éxito. ID: {blob_id}")
                             
                             # Todo objeto DataTransfer() debe ser destruido después de que se haya completado la transferencia de datos.
@@ -92,7 +92,7 @@ class Client(Ice.Application):
                 try:
                     blob_id = input("Ingrese el Blob ID para descargar: ")
                     # Descargar el blob utilizando el servicioBlob
-                    data_transfer_proxy = servicioBlob.download(blob_id)
+                    data_transfer_proxy = servicioBlob.download(None, blob_id)
 
                     # Utilizar el proxy para recibir los datos del servicio y guardarlos en un archivo local
                     with open(f"download_{blob_id}.txt", "wb") as file:
