@@ -118,6 +118,7 @@ class BlobService(IceDrive.BlobService):
                 print(f"Error al subir el blob: {exception}")
             else:
                 print("Blob subido con éxito. Blob ID:", blob_id)
+                blob.close() # Para cerrar el archivo abierto y que no de error al cerrar el cliente
                 self.blobs[blob_id] = 1
                 self.save_storage()
                 return blob_id
