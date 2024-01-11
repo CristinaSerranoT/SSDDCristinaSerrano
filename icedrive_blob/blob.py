@@ -72,13 +72,14 @@ class BlobService(IceDrive.BlobService):
         # Decrementa el conteo de enlaces y elimina el blob si ya no está enlazado
         if blob_id in self.blobs:
             self.blobs[blob_id] -= 1
-            if self.blobs[blob_id] <= 0:
+            if self.blobs[blob_id] == 0:
                 del self.blobs[blob_id]
                 os.remove(os.path.join(ARCHIVOS, f"{blob_id}.txt"))
             self.save_storage()
-            print(f"Desenlace exitoso para el blob con ID: {blob_id}. Total de enlaces: {self.blobs[blob_id]}")
         else:
+            print(f"Desenlace exitoso para el blob con ID: {blob_id}. Total de enlaces: {self.blobs[blob_id]}")
             raise IceDrive.UnknownBlob(blob_id)
+            
 
 
     def upload(self, blob: IceDrive.DataTransferPrx, current: Ice.Current = None) -> str:
