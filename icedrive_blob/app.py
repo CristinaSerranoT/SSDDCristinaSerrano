@@ -1,12 +1,9 @@
-"""Authentication service application."""
-
 import logging
 import sys
-from typing import List
-
 import Ice
-
+from typing import List
 from .blob import BlobService
+from .discovery import Discovery
 
 
 class BlobApp(Ice.Application):
@@ -14,13 +11,22 @@ class BlobApp(Ice.Application):
 
     def run(self, args: List[str]) -> int:
         """Execute the code for the BlobApp class."""
-        adapter = self.communicator().createObjectAdapter("BlobAdapter")
+        # Inicia el adaptador del objeto
+        adapter = self.communicator().createObjectAdapterWithEndpoints("BlobAdapter", "tcp -h localhost -p 10000")
         adapter.activate()
 
-        servant = BlobService()
-        servant_proxy = adapter.addWithUUID(servant)
+        # Crea una instancia del servicio de Blob
+        blob_service = BlobService()
 
-        logging.info("Proxy: %s", servant_proxy)
+        # Añade el servicio al adaptador
+        blob_proxy = adapter.add(blob_service, self.communicator().stringToIdentity("BlobService"))
+        
+        # Añade el adaptador a la interfaz de descubrimiento
+        discovery_proxy = self.communicator().stringToProxy("Discovery/Discovery")
+        discovery = Discovery.IceDrive.DiscoveryPrx.checkedCast(discovery_proxy)
+        discovery.announceBlobService(blob_proxy)
+
+        logging.info("BlobService proxy: %s", blob_proxy)
 
         self.shutdownOnInterrupt()
         self.communicator().waitForShutdown()
@@ -31,4 +37,4 @@ class BlobApp(Ice.Application):
 def main():
     """Handle the icedrive-authentication program."""
     app = BlobApp()
-    return app.main(sys.argv)
+    sys.exit(app.main(sys.argv))
