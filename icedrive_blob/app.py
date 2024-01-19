@@ -127,6 +127,4 @@ class BlobApp(Ice.Application):
 def main():
     """Handle the icedrive-authentication program."""
     app = BlobApp()
-    sys.exit(app.main(sys.argv))   
-    #app = BlobApp(Otros_Servicios)
-    #sys.exit(app.main(sys.argv))
+    sys.exit(app.main(sys.argv))
