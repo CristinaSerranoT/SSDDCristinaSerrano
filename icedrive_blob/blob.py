@@ -8,7 +8,6 @@ import hashlib
 import os
 
 
-
 ARCHIVOS = "archivosCopiados"
 
 class DataTransfer(IceDrive.DataTransfer):
@@ -31,10 +30,12 @@ class DataTransfer(IceDrive.DataTransfer):
         
 class BlobService(IceDrive.BlobService):
     """Implementation of an IceDrive.BlobService interface."""
-
-    def __init__(self, storage_file="blob_storage.json"):
+    def __init__(self, almacenamiento_announcement_blob: dict, almacenamiento_announcement_authentication: dict, storage_file="blob_storage.json"):
         self.storage_file = storage_file
         self.load_storage()
+        self.almacenamiento_announcement_blob = almacenamiento_announcement_blob
+        self.almacenamiento_announcement_authentication = almacenamiento_announcement_authentication
+
     
     # Este método devuelve el número de enlaces para el blob_id proporcionado.
     def load_storage(self):
@@ -87,7 +88,9 @@ class BlobService(IceDrive.BlobService):
     def upload(
         self, user: IceDrive.UserPrx, blob: IceDrive.DataTransferPrx, current: Ice.Current = None
     ) -> str:
-            """Register a DataTransfer object to upload a file to the service."""
+        """Register a DataTransfer object to upload a file to the service."""
+
+        if self.almacenamiento_announcement_authentication:
             try:
                 if blob:
                     # Calcula el hash del blob usando SHA256 como identificador
@@ -126,17 +129,23 @@ class BlobService(IceDrive.BlobService):
                 self.blobs[blob_id] = 1
                 self.save_storage()
                 return blob_id
+        else:
+            raise IceDrive.TemporaryUnavailable("La autenticación ha fallado.")
             
     def download(
         self, user: IceDrive.UserPrx, blob_id: str, current: Ice.Current = None
     ) -> IceDrive.DataTransferPrx:
         """Return a DataTransfer object to enable the client to download the given blob_id."""
-        # Verifica si el blob_id es válido antes de devolver el proxy
-        if blob_id in self.blobs:
-            file_path = os.path.join(ARCHIVOS, f"{blob_id}.txt")
-            servant = DataTransfer(file_path)
-            proxy = current.adapter.addWithUUID(servant)
-            data_transfer_proxy = IceDrive.DataTransferPrx.checkedCast(proxy)
-            return data_transfer_proxy
-        else: # Si el blob_id no es válido, lanza una excepción
-            raise IceDrive.UnknownBlob(blob_id)
+
+        if self.almacenamiento_announcement_authentication:
+            # Verifica si el blob_id es válido antes de devolver el proxy
+            if blob_id in self.blobs:
+                file_path = os.path.join(ARCHIVOS, f"{blob_id}.txt")
+                servant = DataTransfer(file_path)
+                proxy = current.adapter.addWithUUID(servant)
+                data_transfer_proxy = IceDrive.DataTransferPrx.checkedCast(proxy)
+                return data_transfer_proxy
+            else: # Si el blob_id no es válido, lanza una excepción
+                raise IceDrive.UnknownBlob(blob_id)
+        else:
+            raise IceDrive.TemporaryUnavailable("La autenticación ha fallado.")
